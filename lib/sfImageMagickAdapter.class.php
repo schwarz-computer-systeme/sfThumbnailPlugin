@@ -218,7 +218,10 @@ class sfImageMagickAdapter
 
   public function loadData($thumbnail, $image, $mime)
   {
-    throw new Exception('This function is not yet implemented. Try a different adapter.');
+    $filename = tempnam(sys_get_temp_dir(), 'SFT');
+    file_put_contents($filename, $image);
+    $this->loadFile($thumbnail, $filename);
+    return true;
   }
 
   public function save($thumbnail, $thumbDest, $targetMime = null)
@@ -228,12 +231,12 @@ class sfImageMagickAdapter
     $width  = $this->sourceWidth;
     $height = $this->sourceHeight;
     $x = $y = 0;
-    switch (@$this->options['method']) 
+    switch (@$this->options['method'])
     {
       case "shave_all":
         $proportion['source'] = $width / $height;
         $proportion['thumb'] = $thumbnail->getThumbWidth() / $thumbnail->getThumbHeight();
-        
+
         if ($proportion['source'] > 1 && $proportion['thumb'] < 1)
         {
           $x = ($width - $height * $proportion['thumb']) / 2;
@@ -292,14 +295,14 @@ class sfImageMagickAdapter
 
         break;
       case 'custom':
-      	$coords = $this->options['coords'];
-      	if (empty($coords)) break;
-      	
-      	$x = $coords['x1'];
-      	$y = $coords['y1'];
-      	$width = $coords['x2'] - $coords['x1'];
-      	$height = $coords['y2'] - $coords['y1'];
-      	
+        $coords = $this->options['coords'];
+        if (empty($coords)) break;
+
+        $x = $coords['x1'];
+        $y = $coords['y1'];
+        $width = $coords['x2'] - $coords['x1'];
+        $height = $coords['y2'] - $coords['y1'];
+
         if (is_null($thumbDest))
         {
           $command = sprintf(
@@ -324,7 +327,7 @@ class sfImageMagickAdapter
 
           $this->image = $thumbDest;
         }
-      	break;
+        break;
     } // end switch
 
     $command .= ' -thumbnail ';
